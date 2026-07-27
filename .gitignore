@@ -27,6 +27,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+teste
 
 # Arquivos gerados pelo Maven
 /.mvn/wrapper/maven-wrapper.jar
