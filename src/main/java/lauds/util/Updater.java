@@ -14,9 +14,23 @@ public class Updater {
     private static final String REPO = "DevCordeirocf/lauds";
     private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases";
     private static final String CURRENT_VERSION = "v1.0.0"; // Versão base
-    private static final String GITHUB_TOKEN = ""; // COLOQUE SEU TOKEN AQUI
+    private static String githubToken = null;
+
+    private static void loadConfig() {
+        File configFile = new File("config.properties");
+        if (configFile.exists()) {
+            try (InputStream input = new FileInputStream(configFile)) {
+                java.util.Properties prop = new java.util.Properties();
+                prop.load(input);
+                githubToken = prop.getProperty("github.token");
+            } catch (IOException ex) {
+                System.err.println("Erro ao carregar config.properties: " + ex.getMessage());
+            }
+        }
+    }
 
     public static void checkForUpdates() {
+        loadConfig();
         new Thread(() -> {
             try {
                 HttpURLConnection conn = (HttpURLConnection) new URL(API_URL).openConnection();
@@ -24,8 +38,8 @@ public class Updater {
                 conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
                 conn.setRequestProperty("User-Agent", "Java-Updater");
                 
-                if (GITHUB_TOKEN != null && !GITHUB_TOKEN.isEmpty()) {
-                    conn.setRequestProperty("Authorization", "token " + GITHUB_TOKEN);
+                if (githubToken != null && !githubToken.isEmpty()) {
+                    conn.setRequestProperty("Authorization", "token " + githubToken);
                 }
 
                 System.out.println("Verificando atualizações em: " + API_URL);
@@ -80,8 +94,8 @@ public class Updater {
 
         File tempFile = File.createTempFile("update-", ".jar");
         HttpURLConnection conn = (HttpURLConnection) new URL(downloadUrl).openConnection();
-        if (GITHUB_TOKEN != null && !GITHUB_TOKEN.isEmpty()) {
-            conn.setRequestProperty("Authorization", "token " + GITHUB_TOKEN);
+        if (githubToken != null && !githubToken.isEmpty()) {
+            conn.setRequestProperty("Authorization", "token " + githubToken);
         }
         
         try (InputStream in = conn.getInputStream()) {
