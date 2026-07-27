@@ -29,6 +29,7 @@
     </dependencies>
 
     <build>
+        <finalName>gerador-laudos</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
