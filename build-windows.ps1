@@ -1,13 +1,23 @@
 $ErrorActionPreference = "Stop"
 
 $appName = "GeradorLaudos"
-$jarName = "gerador-laudos-1.0-SNAPSHOT.jar"
-$targetJar = Join-Path $PSScriptRoot "target\$jarName"
 $distDir = Join-Path $PSScriptRoot "dist"
 $appDir = Join-Path $distDir $appName
 
 Write-Host "Gerando JAR com Maven..."
 mvn package
+
+$jarCandidates = Get-ChildItem -Path (Join-Path $PSScriptRoot "target") -Filter "gerador-laudos*.jar" |
+    Where-Object { $_.Name -notmatch "-sources\.jar$|\.jar\.original$|^original-" } |
+    Sort-Object LastWriteTime -Descending
+
+if (-not $jarCandidates -or $jarCandidates.Count -eq 0) {
+    throw "Nenhum JAR valido encontrado em: $($PSScriptRoot)\target"
+}
+
+$jarFile = $jarCandidates[0]
+$jarName = $jarFile.Name
+$targetJar = $jarFile.FullName
 
 if (-not (Test-Path $targetJar)) {
     throw "JAR nao encontrado em: $targetJar"
