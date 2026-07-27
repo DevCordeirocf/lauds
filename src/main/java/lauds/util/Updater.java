@@ -14,6 +14,7 @@ public class Updater {
     private static final String REPO = "DevCordeirocf/lauds";
     private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases";
     private static final String CURRENT_VERSION = "v1.0.0"; // Versão base
+    private static final String GITHUB_TOKEN = ""; // COLOQUE SEU TOKEN AQUI
 
     public static void checkForUpdates() {
         new Thread(() -> {
@@ -22,6 +23,10 @@ public class Updater {
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
                 conn.setRequestProperty("User-Agent", "Java-Updater");
+                
+                if (GITHUB_TOKEN != null && !GITHUB_TOKEN.isEmpty()) {
+                    conn.setRequestProperty("Authorization", "token " + GITHUB_TOKEN);
+                }
 
                 System.out.println("Verificando atualizações em: " + API_URL);
                 int responseCode = conn.getResponseCode();
@@ -74,7 +79,12 @@ public class Updater {
         }
 
         File tempFile = File.createTempFile("update-", ".jar");
-        try (InputStream in = new URL(downloadUrl).openStream()) {
+        HttpURLConnection conn = (HttpURLConnection) new URL(downloadUrl).openConnection();
+        if (GITHUB_TOKEN != null && !GITHUB_TOKEN.isEmpty()) {
+            conn.setRequestProperty("Authorization", "token " + GITHUB_TOKEN);
+        }
+        
+        try (InputStream in = conn.getInputStream()) {
             Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
