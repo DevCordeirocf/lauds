@@ -13,7 +13,7 @@ import java.nio.file.StandardCopyOption;
 public class Updater {
     private static final String REPO = "DevCordeirocf/lauds";
     private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases/latest";
-    private static final String CURRENT_VERSION = "1.0-SNAPSHOT"; // Deve bater com o pom.xml
+    private static final String CURRENT_VERSION = "1.1-SNAPSHOT"; // Deve bater com o pom.xml
 
     public static void checkForUpdates() {
         new Thread(() -> {
