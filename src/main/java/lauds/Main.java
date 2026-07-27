@@ -5,11 +5,13 @@ import javax.swing.UIManager;
 
 import lauds.Dao.ConexaoSQLite;
 import lauds.view.JanelaPrincipal;
+import lauds.util.Updater;
 
 public class Main {
     public static void main(String[] args) {
         System.out.println("Iniciando o Gerador de Laudos Técnicos...");
         ConexaoSQLite.inicializarBanco();
+        Updater.checkForUpdates();
 
         SwingUtilities.invokeLater(() -> {
             try {
