@@ -13,7 +13,7 @@ import java.nio.file.StandardCopyOption;
 public class Updater {
     private static final String REPO = "DevCordeirocf/lauds";
     private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases/latest";
-    private static final String CURRENT_VERSION = "1.0-SNAPSHOT"; // Deve bater com o pom.xml
+    private static final String CURRENT_VERSION = "v1.0.0"; // Versão base
 
     public static void checkForUpdates() {
         new Thread(() -> {
@@ -28,7 +28,8 @@ public class Updater {
                     JsonObject release = JsonParser.parseReader(reader).getAsJsonObject();
                     String latestVersion = release.get("tag_name").getAsString();
 
-                    if (!latestVersion.equals(CURRENT_VERSION)) {
+                    // Se a versão do GitHub começar com 'v', comparamos de forma simples
+                    if (latestVersion != null && !latestVersion.equals(CURRENT_VERSION)) {
                         int response = JOptionPane.showConfirmDialog(null,
                                 "Uma nova versão (" + latestVersion + ") está disponível. Deseja atualizar agora?",
                                 "Atualização Disponível",
@@ -47,14 +48,14 @@ public class Updater {
 
     private static void downloadAndInstall(JsonObject release) throws Exception {
         String downloadUrl = null;
-        String fileName = "gerador-laudos.jar";
 
         // Procura pelo JAR nos assets do release
         for (var asset : release.getAsJsonArray("assets")) {
             JsonObject assetObj = asset.getAsJsonObject();
-            if (assetObj.get("name").getAsString().endsWith(".jar")) {
+            String name = assetObj.get("name").getAsString();
+            // Procura especificamente pelo nosso JAR
+            if (name.equals("gerador-laudos.jar")) {
                 downloadUrl = assetObj.get("browser_download_url").getAsString();
-                fileName = assetObj.get("name").getAsString();
                 break;
             }
         }
