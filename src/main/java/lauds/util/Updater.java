@@ -23,14 +23,15 @@ public class Updater {
                 conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
                 conn.setRequestProperty("User-Agent", "Java-Updater");
 
+                System.out.println("Verificando atualizações em: " + API_URL);
                 if (conn.getResponseCode() == 200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     JsonObject release = JsonParser.parseReader(reader).getAsJsonObject();
                     String latestVersion = release.get("tag_name").getAsString();
+                    
                     System.out.println("Versão local: " + CURRENT_VERSION);
                     System.out.println("Versão GitHub: " + latestVersion);
 
-                    // Se a versão do GitHub começar com 'v', comparamos de forma simples
                     if (latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim())) {
                         int response = JOptionPane.showConfirmDialog(null,
                                 "Uma nova versão (" + latestVersion + ") está disponível. Deseja atualizar agora?",
@@ -44,6 +45,7 @@ public class Updater {
                 }
             } catch (Exception e) {
                 System.err.println("Erro ao verificar atualizações: " + e.getMessage());
+                e.printStackTrace();
             }
         }).start();
     }
