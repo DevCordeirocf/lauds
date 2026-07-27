@@ -156,8 +156,8 @@ public class PainelLaudoOS extends JPanel {
 
         painelEsquerdo.add(separador());
 
-        painelEsquerdo.add(TemaUI.subtitulo("Componentes"));
-        painelEsquerdo.add(TemaUI.label("Desmarque os itens com defeito"));
+        painelEsquerdo.add(TemaUI.subtitulo("Checklist de Componentes"));
+        painelEsquerdo.add(TemaUI.label("Marque o estado de cada item:"));
         painelEsquerdo.add(Box.createVerticalStrut(10));
         adicionarComponente("Tela");
         adicionarComponente("Teclado");
@@ -294,6 +294,8 @@ public class PainelLaudoOS extends JPanel {
         }
 
         for (PainelComponente comp : listaComponentes) {
+            if (!comp.foiVerificado()) continue;
+
             if (isPlacaMorta) {
                 if (comp.getNome().equalsIgnoreCase("Memória RAM")) {
                     if (comp.isOk()) {
@@ -417,6 +419,7 @@ public class PainelLaudoOS extends JPanel {
             EstadoComponente item = new EstadoComponente();
             item.nome = comp.getNome();
             item.ok = comp.isOk();
+            item.verificado = comp.foiVerificado();
             item.gravidade = comp.getTipoGravidade();
             item.codigo = comp.getCodigo().trim();
             estado.componentes.add(item);
@@ -454,7 +457,9 @@ public class PainelLaudoOS extends JPanel {
             for (EstadoComponente estadoComponente : estado.componentes) {
                 for (PainelComponente componente : listaComponentes) {
                     if (componente.getNome().equalsIgnoreCase(estadoComponente.nome)) {
-                        componente.aplicarEstado(estadoComponente.ok, estadoComponente.gravidade, estadoComponente.codigo);
+                        if (estadoComponente.verificado) {
+                            componente.aplicarEstado(estadoComponente.ok, estadoComponente.gravidade, estadoComponente.codigo);
+                        }
                         break;
                     }
                 }

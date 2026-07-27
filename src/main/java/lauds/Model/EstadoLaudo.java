@@ -16,6 +16,7 @@ public class EstadoLaudo {
     public static class EstadoComponente {
         public String nome = "";
         public boolean ok = true;
+        public boolean verificado = false;
         public String gravidade = "NECESSARIO";
         public String codigo = "";
     }
