@@ -56,15 +56,18 @@ public class Updater {
                         System.out.println("Versão GitHub: " + latestVersion);
 
                         if (latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim())) {
-                        int response = JOptionPane.showConfirmDialog(null,
-                                "Uma nova versão (" + latestVersion + ") está disponível. Deseja atualizar agora?",
-                                "Atualização Disponível",
-                                JOptionPane.YES_NO_OPTION);
+                            int response = JOptionPane.showConfirmDialog(null,
+                                    "Uma nova versão (" + latestVersion + ") está disponível. Deseja atualizar agora?",
+                                    "Atualização Disponível",
+                                    JOptionPane.YES_NO_OPTION);
 
-                        if (response == JOptionPane.YES_OPTION) {
-                            downloadAndInstall(release);
+                            if (response == JOptionPane.YES_OPTION) {
+                                downloadAndInstall(release);
+                            }
                         }
                     }
+                } else {
+                    System.out.println("Resposta da API: " + responseCode);
                 }
             } catch (Exception e) {
                 System.err.println("Erro ao verificar atualizações: " + e.getMessage());
@@ -76,11 +79,9 @@ public class Updater {
     private static void downloadAndInstall(JsonObject release) throws Exception {
         String downloadUrl = null;
 
-        // Procura pelo JAR nos assets do release
         for (var asset : release.getAsJsonArray("assets")) {
             JsonObject assetObj = asset.getAsJsonObject();
             String name = assetObj.get("name").getAsString();
-            // Procura especificamente pelo nosso JAR
             if (name.equals("gerador-laudos.jar")) {
                 downloadUrl = assetObj.get("browser_download_url").getAsString();
                 break;
@@ -102,7 +103,6 @@ public class Updater {
             Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
-        // Script para substituir o arquivo e reiniciar
         String currentJarPath = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
         
         if (currentJarPath.endsWith(".jar")) {
