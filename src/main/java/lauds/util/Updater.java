@@ -27,9 +27,11 @@ public class Updater {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     JsonObject release = JsonParser.parseReader(reader).getAsJsonObject();
                     String latestVersion = release.get("tag_name").getAsString();
+                    System.out.println("Versão local: " + CURRENT_VERSION);
+                    System.out.println("Versão GitHub: " + latestVersion);
 
                     // Se a versão do GitHub começar com 'v', comparamos de forma simples
-                    if (latestVersion != null && !latestVersion.equals(CURRENT_VERSION)) {
+                    if (latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim())) {
                         int response = JOptionPane.showConfirmDialog(null,
                                 "Uma nova versão (" + latestVersion + ") está disponível. Deseja atualizar agora?",
                                 "Atualização Disponível",
