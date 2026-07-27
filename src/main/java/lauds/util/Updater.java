@@ -12,7 +12,7 @@ import java.nio.file.StandardCopyOption;
 
 public class Updater {
     private static final String REPO = "DevCordeirocf/lauds";
-    private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases/latest";
+    private static final String API_URL = "https://api.github.com/repos/" + REPO + "/releases";
     private static final String CURRENT_VERSION = "v1.0.0"; // Versão base
 
     public static void checkForUpdates() {
@@ -24,15 +24,19 @@ public class Updater {
                 conn.setRequestProperty("User-Agent", "Java-Updater");
 
                 System.out.println("Verificando atualizações em: " + API_URL);
-                if (conn.getResponseCode() == 200) {
+                int responseCode = conn.getResponseCode();
+                if (responseCode == 200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    JsonObject release = JsonParser.parseReader(reader).getAsJsonObject();
-                    String latestVersion = release.get("tag_name").getAsString();
+                    var releases = com.google.gson.JsonParser.parseReader(reader).getAsJsonArray();
                     
-                    System.out.println("Versão local: " + CURRENT_VERSION);
-                    System.out.println("Versão GitHub: " + latestVersion);
+                    if (releases.size() > 0) {
+                        JsonObject release = releases.get(0).getAsJsonObject(); // Pega o mais recente da lista
+                        String latestVersion = release.get("tag_name").getAsString();
+                        
+                        System.out.println("Versão local: " + CURRENT_VERSION);
+                        System.out.println("Versão GitHub: " + latestVersion);
 
-                    if (latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim())) {
+                        if (latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim())) {
                         int response = JOptionPane.showConfirmDialog(null,
                                 "Uma nova versão (" + latestVersion + ") está disponível. Deseja atualizar agora?",
                                 "Atualização Disponível",
