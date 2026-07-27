@@ -1,0 +1,32 @@
+# Compilação e artefatos
+
+dist/
+/target/
+/build/
+/bin/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de configuração local
+*.log
+*.tmp
+*.swp
+
+# Banco SQLite local
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos gerados pelo Maven
+/.mvn/wrapper/maven-wrapper.jar
