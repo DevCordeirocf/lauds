@@ -17,6 +17,26 @@ public class Updater {
     
     // O valor abaixo será substituído pelo GitHub Actions durante o build
     private static String githubToken = "GITHUB_TOKEN_PLACEHOLDER"; 
+    private static JLabel statusBar;
+
+    public static void setStatusBar(JLabel label) {
+        statusBar = label;
+    }
+
+    private static void setStatus(String text, int delayMs) {
+        if (statusBar == null) return;
+        SwingUtilities.invokeLater(() -> statusBar.setText(text));
+        if (delayMs > 0) {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(delayMs);
+                    SwingUtilities.invokeLater(() -> {
+                        if (statusBar.getText().equals(text)) statusBar.setText("");
+                    });
+                } catch (InterruptedException ignored) {}
+            }).start();
+        }
+    }
 
     private static void loadConfig() {
         // Se o token injetado for o placeholder, tenta carregar do arquivo local (para desenvolvimento)
@@ -37,10 +57,11 @@ public class Updater {
     public static void checkForUpdates() {
         loadConfig();
         
-        // Se ainda for o placeholder após carregar a config, limpa para não enviar lixo na API
         if ("GITHUB_TOKEN_PLACEHOLDER".equals(githubToken)) {
             githubToken = null;
         }
+        
+        setStatus("Verificando atualizações...", 0);
         
         new Thread(() -> {
             try {
@@ -63,18 +84,27 @@ public class Updater {
                         String latestVersion = release.get("tag_name").getAsString();
                         
                         if (latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim())) {
+                            setStatus("Atualização disponível: " + latestVersion, 10000);
                             int response = JOptionPane.showConfirmDialog(null,
                                     "Uma nova versão (" + latestVersion + ") está disponível. Deseja atualizar agora?",
                                     "Atualização Disponível",
                                     JOptionPane.YES_NO_OPTION);
 
                             if (response == JOptionPane.YES_OPTION) {
+                                setStatus("Baixando atualização...", 0);
                                 downloadAndInstall(release);
                             }
+                        } else {
+                            setStatus("O sistema está atualizado", 5000);
                         }
+                    } else {
+                        setStatus("Nenhum release encontrado", 5000);
                     }
+                } else {
+                    setStatus("Erro ao verificar atualizações", 5000);
                 }
             } catch (Exception e) {
+                setStatus("Erro de conexão com GitHub", 5000);
                 System.err.println("Erro ao verificar atualizações: " + e.getMessage());
             }
         }).start();

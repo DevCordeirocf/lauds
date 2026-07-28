@@ -23,6 +23,7 @@ public class JanelaPrincipal extends JFrame {
 
     private final JTabbedPane sistemaDeAbas;
     private final PainelHistorico abaHistorico;
+    private final JLabel lblStatusUpdate;
 
     public JanelaPrincipal() {
         setTitle("Gerador de Laudos Técnicos");
@@ -62,6 +63,16 @@ public class JanelaPrincipal extends JFrame {
 
         add(barraSuperior, BorderLayout.NORTH);
         add(sistemaDeAbas, BorderLayout.CENTER);
+
+        JPanel painelRodape = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 2));
+        painelRodape.setOpaque(false);
+        lblStatusUpdate = new JLabel("");
+        lblStatusUpdate.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        lblStatusUpdate.setForeground(TemaUI.TEXTO_SUAVE);
+        painelRodape.add(lblStatusUpdate);
+        add(painelRodape, BorderLayout.SOUTH);
+        
+        Updater.setStatusBar(lblStatusUpdate);
     }
 
     private void criarNovaAbaOS() {
