@@ -1,14 +1,23 @@
 package lauds.util;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import javax.swing.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import com.google.gson.JsonObject;
 
 public class Updater {
     private static final String REPO = "DevCordeirocf/lauds";
@@ -56,10 +65,6 @@ public class Updater {
 
     public static void checkForUpdates() {
         loadConfig();
-        
-        if ("GITHUB_TOKEN_PLACEHOLDER".equals(githubToken)) {
-            githubToken = null;
-        }
         
         setStatus("Verificando atualizações...", 0);
         
