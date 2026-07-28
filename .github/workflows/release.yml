@@ -26,9 +26,16 @@ jobs:
           cache: 'maven'
 
       - name: Inject Token
-        shell: bash
+        shell: pwsh
         run: |
-          sed -i "s/GITHUB_TOKEN_PLACEHOLDER/${{ secrets.MY_GITHUB_TOKEN }}/g" src/main/java/lauds/util/Updater.java
+          $filePath = "src/main/java/lauds/util/Updater.java"
+          $token = "${{ secrets.MY_GITHUB_TOKEN }}"
+          if (-not $token) {
+            Write-Error "O Secret MY_GITHUB_TOKEN não foi encontrado! Verifique as configurações do repositório."
+            exit 1
+          }
+          (Get-Content $filePath) -replace 'GITHUB_TOKEN_PLACEHOLDER', $token | Set-Content $filePath
+          Write-Host "Token injetado com sucesso no código fonte."
 
       - name: Build with Maven
         run: mvn clean package
