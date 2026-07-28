@@ -119,7 +119,7 @@ public class Updater {
                 } else if (responseCode == 404) {
                     setStatus("Erro 404: Verifique o Token", 7000);
                 } else if (responseCode == 401) {
-                    setStatus("Erro 401: Token Inválido", 7000);
+                    setStatus("Erro 401: Token Inválido" + "GITHUB_TOKEN_PLACEHOLDER", 7000);
                 } else {
                     setStatus("Erro HTTP: " + responseCode, 7000);
                 }
