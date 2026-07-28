@@ -1,3 +1,26 @@
 
 # Configurações locais (Tokens, etc)
 config.properties
+
+# Build output
+dist/
+target/
+build/
+
+# Compiled files
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
