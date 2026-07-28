@@ -75,6 +75,17 @@ public class Updater {
                 }
 
                 int responseCode = conn.getResponseCode();
+                
+                // Se falhar com 'token ', tenta novamente com 'Bearer ' (para tokens fine-grained)
+                if ((responseCode == 401 || responseCode == 403 || responseCode == 404) && githubToken != null) {
+                    conn = (HttpURLConnection) new URL(API_URL).openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
+                    conn.setRequestProperty("User-Agent", "Java-Updater");
+                    conn.setRequestProperty("Authorization", "Bearer " + githubToken);
+                    responseCode = conn.getResponseCode();
+                }
+
                 if (responseCode == 200) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     var releases = com.google.gson.JsonParser.parseReader(reader).getAsJsonArray();
