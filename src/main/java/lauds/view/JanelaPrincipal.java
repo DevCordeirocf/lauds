@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import lauds.Model.EstadoLaudo;
+import lauds.util.Updater;
 
 @SuppressWarnings({"serial", "this-escape"})
 public class JanelaPrincipal extends JFrame {
