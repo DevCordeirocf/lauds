@@ -100,11 +100,15 @@ public class Updater {
                     } else {
                         setStatus("Nenhum release encontrado", 5000);
                     }
+                } else if (responseCode == 404) {
+                    setStatus("Erro 404: Verifique o Token", 7000);
+                } else if (responseCode == 401) {
+                    setStatus("Erro 401: Token Inválido", 7000);
                 } else {
-                    setStatus("Erro ao verificar atualizações", 5000);
+                    setStatus("Erro HTTP: " + responseCode, 7000);
                 }
             } catch (Exception e) {
-                setStatus("Erro de conexão com GitHub", 5000);
+                setStatus("Erro: " + e.getMessage(), 7000);
                 System.err.println("Erro ao verificar atualizações: " + e.getMessage());
             }
         }).start();
