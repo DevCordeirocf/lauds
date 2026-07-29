@@ -14,7 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -106,6 +105,17 @@ final class TemaUI {
         return botaoBase(texto, new Color(240, 246, 250), TEXTO_ESCURO, BORDA);
     }
 
+    static JButton botaoPequeno(String texto) {
+        JButton botao = botaoBase(texto, Color.WHITE, TEXTO_SUAVE, BORDA);
+        botao.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        botao.setPreferredSize(new Dimension(28, 28));
+        botao.setMinimumSize(new Dimension(28, 28));
+        botao.setMaximumSize(new Dimension(28, 28));
+        botao.setForeground(ALERTA);
+        botao.setBorder(new CompoundBorder(new LineBorder(BORDA, 1, true), new EmptyBorder(2, 2, 2, 2)));
+        return botao;
+    }
+
     static JTextField campoTexto() {
         JTextField campo = new JTextField();
         campo.setFont(CORPO);
@@ -113,8 +123,8 @@ final class TemaUI {
         campo.setForeground(TEXTO_ESCURO);
         campo.setCaretColor(TEXTO_ESCURO);
         campo.setBorder(campoBorda());
-        campo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
-        campo.setPreferredSize(new Dimension(180, 42));
+        campo.setMaximumSize(new Dimension(180, 32));
+        campo.setPreferredSize(new Dimension(180, 32));
         return campo;
     }
 

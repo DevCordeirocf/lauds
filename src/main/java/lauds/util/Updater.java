@@ -60,7 +60,7 @@ public class Updater {
                     prop.load(input);
                     githubToken = prop.getProperty("github.token");
                     String masked = (githubToken == null) ? "(null)" : (githubToken.length() > 8 ? githubToken.substring(0,4) + "..." + githubToken.substring(githubToken.length()-4) : "(set)");
-                    LOGGER.info("config.properties carregado. Token presente: " + (githubToken != null) + ", valor: " + masked);
+                    LOGGER.log(java.util.logging.Level.INFO, "config.properties carregado. Token presente: {0}, valor: {1}", new Object[]{githubToken != null, masked});
                 } catch (IOException ex) {
                     LOGGER.log(Level.WARNING, "Erro ao carregar config.properties", ex);
                 }
@@ -75,7 +75,7 @@ public class Updater {
     public static void checkForUpdates() {
         loadConfig();
         
-        LOGGER.info("Verificando atualizações para " + API_URL + ", token presente: " + (githubToken != null && !githubToken.isEmpty()));
+        LOGGER.log(Level.INFO, "Verificando atualizações para {0}, token presente: {1}", new Object[]{API_URL, githubToken != null && !githubToken.isEmpty()});
         setStatus("Verificando atualizações...", 0);
         
         new Thread(() -> {
@@ -90,94 +90,93 @@ public class Updater {
                 }
 
                 int responseCode = conn.getResponseCode();
-                LOGGER.info("GitHub API response code: " + responseCode);
+                LOGGER.log(Level.INFO, "GitHub API response code: {0}", responseCode);
                 
                 // Se falhar com 'token ', tenta novamente com 'Bearer ' (para tokens fine-grained)
                 if ((responseCode == 401 || responseCode == 403 || responseCode == 404) && githubToken != null) {
-                    LOGGER.info("Primeira tentativa com 'token ' falhou (" + responseCode + "), tentando com 'Bearer '");
+                    LOGGER.log(Level.INFO, "Primeira tentativa com 'token ' falhou ({0}), tentando com 'Bearer '", responseCode);
                     conn = (HttpURLConnection) new URL(API_URL).openConnection();
                     conn.setRequestMethod("GET");
                     conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
                     conn.setRequestProperty("User-Agent", "Java-Updater");
                     conn.setRequestProperty("Authorization", "Bearer " + githubToken);
                     responseCode = conn.getResponseCode();
-                    LOGGER.info("GitHub API response code (Bearer retry): " + responseCode);
+                    LOGGER.log(Level.INFO, "GitHub API response code (Bearer retry): {0}", responseCode);
                 }
 
-                if (responseCode == 200) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    var releases = com.google.gson.JsonParser.parseReader(reader).getAsJsonArray();
-                    LOGGER.info("Releases obtidos: " + releases.size());
-                    
-                    if (releases.size() > 0) {
-                        JsonObject release = releases.get(0).getAsJsonObject();
-                        String latestVersion = release.has("tag_name") ? release.get("tag_name").getAsString() : null;
-                        LOGGER.info("Release selecionado: tag_name=" + latestVersion);
+                switch (responseCode) {
+                    case 200 -> {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                        var releases = com.google.gson.JsonParser.parseReader(reader).getAsJsonArray();
+                        LOGGER.log(Level.INFO, "Releases obtidos: {0}", releases.size());
+                        
+                        if (releases.size() > 0) {
+                            JsonObject release = releases.get(0).getAsJsonObject();
+                            String latestVersion = release.has("tag_name") ? release.get("tag_name").getAsString() : null;
+                            LOGGER.log(Level.INFO, "Release selecionado: tag_name={0}", latestVersion);
 
-                        // Tentar detectar o JAR atual (caso a aplicação esteja sendo executada de um JAR)
-                        String currentJarPath = null;
-                        long currentJarSize = -1L;
-                        try {
-                            currentJarPath = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
-                            if (currentJarPath.endsWith(".jar")) {
-                                File currentJarFile = new File(currentJarPath);
-                                if (currentJarFile.exists()) currentJarSize = currentJarFile.length();
-                            }
-                        } catch (Exception ex) {
-                            LOGGER.log(Level.FINE, "Falha ao obter caminho/size do JAR atual", ex);
-                        }
-                        LOGGER.info("JAR atual: " + currentJarPath + ", tamanho=" + currentJarSize);
-
-                        // Procurar o asset gerador-laudos.jar e comparar tamanho como verificação primária
-                        long assetSize = -1L;
-                        for (var asset : release.getAsJsonArray("assets")) {
-                            JsonObject assetObj = asset.getAsJsonObject();
-                            String name = assetObj.get("name").getAsString();
-                            LOGGER.fine("Asset encontrado no release: " + name + ", size present: " + assetObj.has("size"));
-                            if (name.equals("gerador-laudos.jar") && assetObj.has("size")) {
-                                assetSize = assetObj.get("size").getAsLong();
-                                LOGGER.info("Asset gerador-laudos.jar size=" + assetSize + ", browser_download_url=" + (assetObj.has("browser_download_url") ? assetObj.get("browser_download_url").getAsString() : "(nenhum)"));
-                                break;
-                            }
-                        }
-                        LOGGER.info("AssetSize=" + assetSize + ", currentJarSize=" + currentJarSize);
-
-                        if (assetSize > 0 && currentJarSize > 0 && assetSize == currentJarSize) {
-                            // Mesmo tamanho: muito provável que já estamos com a mesma build instalada
-                            setStatus("O sistema está atualizado", 5000);
-                        } else {
-                            // Se não for possível comparar por tamanho, cair de volta para comparação por tag
-                            boolean differentTag = latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim());
-                            if (assetSize > 0 && currentJarSize > 0) {
-                                // Se tamanhos diferentes, forçar atualização (mesmo que tags sejam iguais)
-                                differentTag = true;
-                            }
-
-                            if (differentTag) {
-                                String displayVersion = latestVersion != null ? latestVersion : "(versão desconhecida)";
-                                setStatus("Atualização disponível: " + displayVersion, 10000);
-                                int response = JOptionPane.showConfirmDialog(null,
-                                        "Uma nova versão (" + displayVersion + ") está disponível. Deseja atualizar agora?",
-                                        "Atualização Disponível",
-                                        JOptionPane.YES_NO_OPTION);
-
-                                if (response == JOptionPane.YES_OPTION) {
-                                    setStatus("Baixando atualização...", 0);
-                                    downloadAndInstall(release);
+                            // Tentar detectar o JAR atual (caso a aplicação esteja sendo executada de um JAR)
+                            String currentJarPath = null;
+                            long currentJarSize = -1L;
+                            try {
+                                currentJarPath = new File(Updater.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getPath();
+                                if (currentJarPath.endsWith(".jar")) {
+                                    File currentJarFile = new File(currentJarPath);
+                                    if (currentJarFile.exists()) currentJarSize = currentJarFile.length();
                                 }
-                            } else {
-                                setStatus("O sistema está atualizado", 5000);
+                            } catch (java.net.URISyntaxException ex) {
+                                LOGGER.log(Level.FINE, "Falha ao obter caminho/size do JAR atual", ex);
                             }
+                            LOGGER.log(Level.INFO, "JAR atual: {0}, tamanho={1}", new Object[]{currentJarPath, currentJarSize});
+
+                            // Procurar o asset gerador-laudos.jar e comparar tamanho como verificação primária
+                            long assetSize = -1L;
+                            for (var asset : release.getAsJsonArray("assets")) {
+                                JsonObject assetObj = asset.getAsJsonObject();
+                                String name = assetObj.get("name").getAsString();
+                                LOGGER.log(Level.FINE, "Asset encontrado no release: {0}, size present: {1}", new Object[]{name, assetObj.has("size")});
+                                if (name.equals("gerador-laudos.jar") && assetObj.has("size")) {
+                                    assetSize = assetObj.get("size").getAsLong();
+                                    LOGGER.log(Level.INFO, "Asset gerador-laudos.jar size={0}, browser_download_url={1}", new Object[]{assetSize, assetObj.has("browser_download_url") ? assetObj.get("browser_download_url").getAsString() : "(nenhum)"});
+                                    break;
+                                }
+                            }
+                            LOGGER.log(Level.INFO, "AssetSize={0}, currentJarSize={1}", new Object[]{assetSize, currentJarSize});
+
+                            if (assetSize > 0 && currentJarSize > 0 && assetSize == currentJarSize) {
+                                // Mesmo tamanho: muito provável que já estamos com a mesma build instalada
+                                setStatus("O sistema está atualizado", 5000);
+                            } else {
+                                // Se não for possível comparar por tamanho, cair de volta para comparação por tag
+                                boolean differentTag = latestVersion != null && !latestVersion.trim().equalsIgnoreCase(CURRENT_VERSION.trim());
+                                if (assetSize > 0 && currentJarSize > 0) {
+                                    // Se tamanhos diferentes, forçar atualização (mesmo que tags sejam iguais)
+                                    differentTag = true;
+                                }
+
+                                if (differentTag) {
+                                    String displayVersion = latestVersion != null ? latestVersion : "(versão desconhecida)";
+                                    setStatus("Atualização disponível: " + displayVersion, 10000);
+                                    int response = JOptionPane.showConfirmDialog(null,
+                                            "Uma nova versão (" + displayVersion + ") está disponível. Deseja atualizar agora?",
+                                            "Atualização Disponível",
+                                            JOptionPane.YES_NO_OPTION);
+
+                                    if (response == JOptionPane.YES_OPTION) {
+                                        setStatus("Baixando atualização...", 0);
+                                        downloadAndInstall(release);
+                                    }
+                                } else {
+                                    setStatus("O sistema está atualizado", 5000);
+                                }
+                            }
+                        } else {
+                            setStatus("Nenhum release encontrado", 5000);
                         }
-                    } else {
-                        setStatus("Nenhum release encontrado", 5000);
                     }
-                } else if (responseCode == 404) {
-                    setStatus("Erro 404: Verifique o Token", 7000);
-                } else if (responseCode == 401) {
-                    setStatus("Erro 401: Token Inválido", 7000);
-                } else {
-                    setStatus("Erro HTTP: " + responseCode, 7000);
+                    case 404 -> setStatus("Erro 404: Verifique o Token", 7000);
+                    case 401 -> setStatus("Erro 401: Token Inválido", 7000);
+                    default -> setStatus("Erro HTTP: " + responseCode, 7000);
                 }
             } catch (Exception e) {
                 setStatus("Erro: " + e.getMessage(), 7000);
@@ -208,8 +207,8 @@ public class Updater {
 
         File tempFile = File.createTempFile("update-", ".jar");
 
-        LOGGER.info("Iniciando download do asset. assetApiUrl present: " + downloadUrl.contains("/repos/") + ", browser fallback used: " + !downloadUrl.contains("/repos/"));
-        LOGGER.fine("downloadUrl=" + downloadUrl + ", tokenPresent=" + (githubToken != null && !githubToken.isEmpty()));
+        LOGGER.log(Level.INFO, "Iniciando download do asset. assetApiUrl present: {0}, browser fallback used: {1}", new Object[]{downloadUrl.contains("/repos/"), !downloadUrl.contains("/repos/")});
+        LOGGER.log(Level.FINE, "downloadUrl={0}, tokenPresent={1}", new Object[]{downloadUrl, githubToken != null && !githubToken.isEmpty()});
         HttpURLConnection conn = (HttpURLConnection) new URL(downloadUrl).openConnection();
         conn.setRequestMethod("GET");
         conn.setRequestProperty("User-Agent", "Java-Updater");
@@ -223,7 +222,7 @@ public class Updater {
         conn.setInstanceFollowRedirects(true);
 
         int responseCode = conn.getResponseCode();
-        LOGGER.info("Resposta do servidor de download: HTTP " + responseCode);
+        LOGGER.log(Level.INFO, "Resposta do servidor de download: HTTP {0}", responseCode);
         // Se houver problemas de autorização, tentar o prefixo Bearer (tokens fine-grained)
         if ((responseCode == 401 || responseCode == 403) && githubToken != null && !githubToken.isEmpty()) {
             conn = (HttpURLConnection) new URL(downloadUrl).openConnection();
@@ -242,7 +241,7 @@ public class Updater {
                 Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
             long downloaded = tempFile.length();
-            LOGGER.info("Download concluído. Arquivo temporário: " + tempFile.getAbsolutePath() + ", bytes=" + downloaded);
+            LOGGER.log(Level.INFO, "Download concluído. Arquivo temporário: {0}, bytes={1}", new Object[]{tempFile.getAbsolutePath(), downloaded});
         } else {
             String msg = "Falha ao baixar atualização: HTTP " + responseCode;
             LOGGER.warning(msg);
@@ -265,7 +264,7 @@ public class Updater {
 
         if (currentJarPath.endsWith(".jar")) {
             File updateScript = createUpdateScript(tempFile, currentJar, exeFile);
-            LOGGER.info("Executando script de atualização: " + updateScript.getAbsolutePath());
+            LOGGER.log(Level.INFO, "Executando script de atualização: {0}", updateScript.getAbsolutePath());
             Runtime.getRuntime().exec("cmd /c start /min \"\" \"" + updateScript.getAbsolutePath() + "\"");
             System.exit(0);
         }
@@ -285,7 +284,7 @@ public class Updater {
             }
             writer.println("del \"%~f0\"");
         }
-        LOGGER.info("Script de atualização criado em: " + script.getAbsolutePath());
+        LOGGER.log(Level.INFO, "Script de atualização criado em: {0}", script.getAbsolutePath());
         return script;
     }
 }

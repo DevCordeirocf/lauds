@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -28,7 +29,7 @@ public class PainelDisco extends JPanel {
     private final JRadioButton rbSemBackup;
     private final Runnable aoAlterar;
 
-    public PainelDisco(String nomeDisco, Runnable aoAlterar) {
+    public PainelDisco(String nomeDisco, Runnable aoAlterar, Runnable aoRemover) {
         this.nomeDisco = nomeDisco;
         this.aoAlterar = aoAlterar;
 
@@ -51,6 +52,16 @@ public class PainelDisco extends JPanel {
         chkOk = new JCheckBox("OK", true);
         TemaUI.aplicarCheck(chkOk);
         linhaPrincipal.add(chkOk);
+
+        JButton btnRemover = TemaUI.botaoPequeno("X");
+        btnRemover.setPreferredSize(new Dimension(28, 28));
+        btnRemover.setMinimumSize(new Dimension(28, 28));
+        btnRemover.addActionListener(e -> {
+            if (aoRemover != null) {
+                aoRemover.run();
+            }
+        });
+        linhaPrincipal.add(btnRemover);
 
         painelOpcoes = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
         painelOpcoes.setAlignmentX(Component.LEFT_ALIGNMENT);

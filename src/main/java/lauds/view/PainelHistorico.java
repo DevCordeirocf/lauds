@@ -27,8 +27,7 @@ import lauds.Dao.LaudoDAO;
 import lauds.Dao.LaudoDAO.RegistroHistorico;
 import lauds.Model.EstadoLaudo;
 
-@SuppressWarnings({"serial", "this-escape"})
-public class PainelHistorico extends JPanel {
+public final class PainelHistorico extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,7 +42,8 @@ public class PainelHistorico extends JPanel {
     public PainelHistorico(JanelaPrincipal janelaPrincipal) {
         this.janelaPrincipal = janelaPrincipal;
         setLayout(new BorderLayout());
-        TemaUI.aplicarFundo(this);
+        setBackground(TemaUI.FUNDO);
+        setForeground(TemaUI.TEXTO);
         setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -118,6 +118,15 @@ public class PainelHistorico extends JPanel {
             }
         });
 
+        tabelaHistorico.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent event) {
+                if (event.getClickCount() == 2) {
+                    reabrirSelecionado();
+                }
+            }
+        });
+
         txtPesquisa.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -141,7 +150,7 @@ public class PainelHistorico extends JPanel {
         carregarDados();
     }
 
-    public void carregarDados() {
+    public final void carregarDados() {
         modeloTabela.setRowCount(0);
         listaAtual = LaudoDAO.buscarHistorico("");
 

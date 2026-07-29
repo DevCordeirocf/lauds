@@ -30,7 +30,6 @@ import lauds.Model.EstadoLaudo;
 import lauds.Model.EstadoLaudo.EstadoComponente;
 import lauds.Model.EstadoLaudo.EstadoDisco;
 
-@SuppressWarnings({"serial", "this-escape"})
 public class PainelLaudoOS extends JPanel {
 
     private static final long serialVersionUID = 1L;
@@ -62,7 +61,8 @@ public class PainelLaudoOS extends JPanel {
         this.listaDiscos = new ArrayList<>();
 
         setLayout(new BorderLayout());
-        TemaUI.aplicarFundo(this);
+        setBackground(TemaUI.FUNDO);
+        setForeground(TemaUI.TEXTO);
         setBorder(BorderFactory.createEmptyBorder(12, 8, 8, 8));
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -78,16 +78,22 @@ public class PainelLaudoOS extends JPanel {
 
         painelEsquerdo.add(TemaUI.label("Localização"));
         txtLocalizacao = criarCampoTexto();
+        txtLocalizacao.setPreferredSize(new Dimension(60, 34));
+        txtLocalizacao.setMaximumSize(new Dimension(60, 34));
         painelEsquerdo.add(txtLocalizacao);
-        painelEsquerdo.add(Box.createVerticalStrut(14));
+        painelEsquerdo.add(Box.createVerticalStrut(10));
 
         painelEsquerdo.add(TemaUI.label("Assinatura"));
         txtAssinatura = criarCampoTexto();
+        txtAssinatura.setPreferredSize(new Dimension(150, 34));
+        txtAssinatura.setMaximumSize(new Dimension(150, 34));
         painelEsquerdo.add(txtAssinatura);
         painelEsquerdo.add(Box.createVerticalStrut(14));
 
         painelEsquerdo.add(TemaUI.label("Problema encontrado"));
         txtProblema = criarCampoTexto();
+        txtProblema.setPreferredSize(new Dimension(300, 34));
+        txtProblema.setMaximumSize(new Dimension(500, 34));
         painelEsquerdo.add(txtProblema);
         painelEsquerdo.add(Box.createVerticalStrut(20));
 
@@ -171,7 +177,7 @@ public class PainelLaudoOS extends JPanel {
 
         JPanel painelDireito = new JPanel(new BorderLayout(0, 12));
         TemaUI.aplicarCard(painelDireito);
-        painelDireito.add(TemaUI.subtitulo("Laudo gerado automaticamente"), BorderLayout.NORTH);
+        painelDireito.add(TemaUI.subtitulo(""), BorderLayout.NORTH);
 
         areaTextoLaudo = TemaUI.areaTexto(true);
         painelDireito.add(TemaUI.scroll(areaTextoLaudo), BorderLayout.CENTER);
@@ -230,7 +236,9 @@ public class PainelLaudoOS extends JPanel {
     }
 
     private void adicionarDisco(String nomeDisco, EstadoDisco estadoDisco) {
-        PainelDisco novoDisco = new PainelDisco(nomeDisco, this::gerarTextoLaudo);
+        final PainelDisco[] discoReferencia = new PainelDisco[1];
+        discoReferencia[0] = new PainelDisco(nomeDisco, this::gerarTextoLaudo, () -> removerDisco(discoReferencia[0]));
+        PainelDisco novoDisco = discoReferencia[0];
         if (estadoDisco != null) {
             novoDisco.aplicarEstado(estadoDisco.ok, estadoDisco.saude, estadoDisco.gravidade, estadoDisco.comBackup);
         }
@@ -238,6 +246,19 @@ public class PainelLaudoOS extends JPanel {
         painelListaDiscos.add(novoDisco);
         painelEsquerdo.revalidate();
         painelEsquerdo.repaint();
+    }
+
+    private void removerDisco(PainelDisco disco) {
+        if (disco == null) {
+            return;
+        }
+        listaDiscos.remove(disco);
+        painelListaDiscos.remove(disco);
+        painelListaDiscos.revalidate();
+        painelListaDiscos.repaint();
+        painelEsquerdo.revalidate();
+        painelEsquerdo.repaint();
+        gerarTextoLaudo();
     }
 
     private void configurarAtualizacaoEmTempoReal() {
@@ -289,6 +310,7 @@ public class PainelLaudoOS extends JPanel {
             if (!Processador.isEmpty()) {
                 texto.append( ", ").append(Processador);
             }
+            texto.append("\nOBS: caso o processador tambem estiver danificado, o valor poderá sofrer alterações");
             
             texto.append("\n\n");
         }

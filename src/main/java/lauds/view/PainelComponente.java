@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-@SuppressWarnings({"serial", "this-escape"})
+@SuppressWarnings({"this-escape"})
 public class PainelComponente extends JPanel {
 
     private static final long serialVersionUID = 1L;
@@ -104,7 +104,7 @@ public class PainelComponente extends JPanel {
         btn.setFocusPainted(false);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btn.setPreferredSize(new Dimension(80, 30));
-        btn.setBackground(Color.WHITE);
+        btn.setBackground(Color.white);
         btn.setForeground(TemaUI.TEXTO_SUAVE);
     }
 
@@ -114,13 +114,13 @@ public class PainelComponente extends JPanel {
         
         if (ok) {
             btnOk.setBackground(TemaUI.VERDE);
-            btnOk.setForeground(Color.WHITE);
-            btnDefeito.setBackground(Color.WHITE);
+            btnOk.setForeground(Color.green);
+            btnDefeito.setBackground(Color.white);
             btnDefeito.setForeground(TemaUI.TEXTO_SUAVE);
             painelOpcoes.setVisible(false);
         } else {
             btnDefeito.setBackground(TemaUI.ALERTA);
-            btnDefeito.setForeground(Color.WHITE);
+            btnDefeito.setForeground(Color.red);
             btnOk.setBackground(Color.WHITE);
             btnOk.setForeground(TemaUI.TEXTO_SUAVE);
             painelOpcoes.setVisible(true);
