@@ -14,7 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-@SuppressWarnings({"serial", "this-escape"})
+@SuppressWarnings({"this-escape"})
 public class PainelDisco extends JPanel {
 
     private static final long serialVersionUID = 1L;

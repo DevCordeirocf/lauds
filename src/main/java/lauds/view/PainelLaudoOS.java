@@ -172,6 +172,7 @@ public class PainelLaudoOS extends JPanel {
         adicionarComponente("Alto falante");
         adicionarComponente("Bateria");
         adicionarComponente("Memória RAM");
+        adicionarComponente("Wi-fi");
 
         splitPane.setLeftComponent(TemaUI.scroll(painelEsquerdo));
 

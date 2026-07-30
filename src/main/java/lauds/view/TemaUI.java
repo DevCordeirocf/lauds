@@ -50,10 +50,6 @@ final class TemaUI {
     private TemaUI() {
     }
 
-    static void aplicarFundo(JComponent componente) {
-        componente.setBackground(FUNDO);
-        componente.setForeground(TEXTO);
-    }
 
     static void aplicarPainel(JComponent componente) {
         componente.setBackground(PAINEL);
@@ -94,13 +90,6 @@ final class TemaUI {
         return botaoBase(texto, AZUL, Color.WHITE, AZUL);
     }
 
-    static JButton botaoDestaque(String texto) {
-        JButton botao = botaoBase(texto, VERDE, Color.WHITE, VERDE);
-        botao.setFont(new Font("Segoe UI", Font.BOLD, 17));
-        botao.setPreferredSize(new Dimension(230, 46));
-        return botao;
-    }
-
     static JButton botaoSecundario(String texto) {
         return botaoBase(texto, new Color(240, 246, 250), TEXTO_ESCURO, BORDA);
     }
@@ -123,8 +112,8 @@ final class TemaUI {
         campo.setForeground(TEXTO_ESCURO);
         campo.setCaretColor(TEXTO_ESCURO);
         campo.setBorder(campoBorda());
-        campo.setMaximumSize(new Dimension(180, 32));
-        campo.setPreferredSize(new Dimension(180, 32));
+        campo.setMaximumSize(new Dimension(180, 29));
+        campo.setPreferredSize(new Dimension(180, 29));
         return campo;
     }
 

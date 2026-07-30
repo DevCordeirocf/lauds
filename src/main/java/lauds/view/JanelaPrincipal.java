@@ -17,7 +17,7 @@ import javax.swing.UIManager;
 import lauds.Model.EstadoLaudo;
 import lauds.util.Updater;
 
-@SuppressWarnings({"serial", "this-escape"})
+@SuppressWarnings({"this-escape"})
 public class JanelaPrincipal extends JFrame {
 
     private static final long serialVersionUID = 1L;

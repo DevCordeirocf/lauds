@@ -57,7 +57,7 @@ public final class PainelHistorico extends JPanel {
         JPanel painelTopo = new JPanel(new BorderLayout(12, 0));
         painelTopo.setOpaque(false);
 
-        JPanel painelPesquisa = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JPanel painelPesquisa = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, -4));
         painelPesquisa.setOpaque(false);
         painelPesquisa.add(TemaUI.label("Pesquisar OS"));
         txtPesquisa = TemaUI.campoTexto();
